@@ -1,0 +1,218 @@
+# Multi-session flow
+User
+  │
+  │ click New Chat / chọn 1 chat
+  ▼
+Sidebar ──(create/select)──► Router push(`/chat/:id`)
+                                   │
+                                   ▼
+                           ChatPage([id])
+                           ├─ load session(id)
+                           ├─ load messages(id)
+                           └─ render UI
+                                   │
+                 user sends msg ───┤
+                                   ▼
+                           post /api/sessions/:id/messages
+                                   │
+                                   ▼
+                           store.update(messages)
+                                   │
+                                   ▼
+                             re-render
+
+State & dữ liệu
+Session: { id: string, title: string, updatedAt: number }
+Message: { id: string, role: 'user'|'assistant', content: string, ts: number }
+Store tối giản (Zustand hoặc Context):
+sessions: Session[]
+messagesById: Record<id, Message[]>
+createSession(title?) -> id
+listSessions()
+getMessages(id)
+appendMessage(id, msg)
+
+Code khung (tối giản, chạy MVP nhanh)
+
+lib/store.ts (Zustand + localStorage)
+
+import { create } from 'zustand'
+
+type Session = { id: string; title: string; updatedAt: number }
+type Message = { id: string; role: 'user'|'assistant'; content: string; ts: number }
+
+type S = {
+  sessions: Session[]
+  messagesById: Record<string, Message[]>
+  createSession: (title?: string) => string
+  appendMessage: (id: string, m: Message) => void
+  hydrate: () => void
+}
+
+const KEY = 'chat-multi'
+
+export const useChatStore = create<S>((set, get) => ({
+  sessions: [],
+  messagesById: {},
+  createSession: (title='New chat') => {
+    const id = crypto.randomUUID()
+    const s = { id, title, updatedAt: Date.now() }
+    const sessions = [s, ...get().sessions]
+    set({ sessions })
+    persist()
+    return id
+  },
+  appendMessage: (id, m) => {
+    const map = { ...get().messagesById }
+    map[id] = [...(map[id]||[]), m]
+    const sessions = get().sessions.map(x => x.id===id ? {...x, updatedAt: Date.now()} : x)
+    set({ messagesById: map, sessions })
+    persist()
+  },
+  hydrate: () => {
+    try {
+      const raw = localStorage.getItem(KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw)
+      set(parsed)
+    } catch {}
+  }
+}))
+
+function persist(){
+  const { sessions, messagesById } = useChatStore.getState()
+  localStorage.setItem('chat-multi', JSON.stringify({ sessions, messagesById }))
+}
+
+
+components/Sidebar.tsx
+
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { useChatStore } from '@/lib/store'
+
+export default function Sidebar(){
+  const router = useRouter()
+  const { sessions, createSession, hydrate } = useChatStore()
+
+  useEffect(() => { hydrate() }, [hydrate])
+
+  return (
+    <div className="w-64 border-r h-screen flex flex-col">
+      <button
+        onClick={() => {
+          const id = createSession()
+          router.push(`/chat/${id}`)
+        }}
+        className="m-2 px-3 py-2 border rounded"
+      >
+        New chat
+      </button>
+
+      <div className="flex-1 overflow-auto">
+        {sessions.map(s => (
+          <Link key={s.id} href={`/chat/${s.id}`} className="block px-3 py-2 hover:bg-gray-100">
+            {s.title}
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
+pages/chat/[id].tsx
+
+import { useRouter } from 'next/router'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useChatStore } from '@/lib/store'
+
+export default function ChatById(){
+  const router = useRouter()
+  const id = router.query.id as string | undefined
+  const { hydrate, messagesById, appendMessage } = useChatStore()
+  const [input, setInput] = useState('')
+
+  useEffect(() => { hydrate() }, [hydrate])
+
+  const msgs = useMemo(() => (id ? (messagesById[id]||[]) : []), [id, messagesById])
+
+  if (!id) return null
+
+  async function send(){
+    if (!input.trim()) return
+    appendMessage(id, { id: crypto.randomUUID(), role: 'user', content: input, ts: Date.now() })
+    setInput('')
+    // gọi backend/LLM của bạn
+    const assistant = await fakeLLM(input)
+    appendMessage(id, { id: crypto.randomUUID(), role: 'assistant', content: assistant, ts: Date.now() })
+  }
+
+  return (
+    <div className="flex">
+      {/* Sidebar có thể layout bên ngoài, hoặc import vào đây */}
+      <div className="flex-1 h-screen flex flex-col">
+        <div className="flex-1 overflow-auto p-4 space-y-3">
+          {msgs.map(m => (
+            <div key={m.id} className={m.role==='user' ? 'text-right' : 'text-left'}>
+              <div className="inline-block border rounded px-3 py-2 max-w-[70%]">
+                {m.content}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="p-3 border-t flex gap-2">
+          <input
+            className="flex-1 border rounded px-3 py-2"
+            value={input}
+            onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=> e.key==='Enter' && send()}
+            placeholder="Type a message..."
+          />
+          <button className="border rounded px-3" onClick={send}>Send</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+async function fakeLLM(q:string){
+  await new Promise(r=>setTimeout(r,300))
+  return `Echo: ${q}`
+}
+
+
+pages/api/sessions/index.ts (MVP có thể chưa cần nếu dùng localStorage; thêm khi bạn muốn DB)
+
+import type { NextApiRequest, NextApiResponse } from 'next'
+
+export default async function handler(req:NextApiRequest,res:NextApiResponse){
+  if (req.method==='GET') return res.status(200).json({ sessions: [] })
+  if (req.method==='POST') return res.status(201).json({ id: 'server-id' })
+  res.status(405).end()
+}
+
+
+pages/api/sessions/[id]/messages.ts
+
+import type { NextApiRequest, NextApiResponse } from 'next'
+
+export default async function handler(req:NextApiRequest,res:NextApiResponse){
+  if (req.method==='GET') return res.status(200).json({ messages: [] })
+  if (req.method==='POST') return res.status(201).json({ ok: true })
+  res.status(405).end()
+}
+
+Cách nó “nối” với nhau
+User bấm New chat ở Sidebar → gọi createSession() → nhận id → router.push('/chat/'+id).
+ChatPage([id]) mount → đọc messagesById[id] → render lịch sử.
+User gửi tin → appendMessage(id, msg) → render ngay → backend trả lời → appendMessage(id, reply) → cập nhật UI.
+sessions được sort tự nhiên nhờ updatedAt mỗi lần nhận msg.
+Toàn bộ state được persist vào localStorage cho MVP; khi cần production, chuyển sang DB.
+Lộ trình nâng cấp nhanh
+MVP: localStorage như trên.
++Server: lưu session/messages vào DB (Postgres + Prisma).
++Streaming: SSE từ API khi LLM trả lời dài.
++Title: đặt title = tóm tắt 1-2 câu đầu của session.
++Delete/Rename: thêm nút trên Sidebar.

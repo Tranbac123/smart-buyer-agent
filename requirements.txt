@@ -1,0 +1,38 @@
+# === Core API (FastAPI + ASGI server + HTTP client) ===
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.30,<0.31
+httpx>=0.27,<0.28
+
+# === Pydantic v2 + settings ===
+pydantic>=2.7,<3
+pydantic-settings>=2.4,<3
+
+# Useful typing backports on some environments
+typing-extensions>=4.9,<5
+
+# === (Optional) Performance JSON ===
+# orjson>=3.10,<4
+
+# === (Optional) Redis client (health/readiness or memory backends) ===
+# redis>=5.0,<6
+
+# === (Optional) Postgres drivers (choose ONE or both) ===
+# psycopg[binary]>=3.2,<4   # psycopg v3 async/sync driver with binary wheels
+# asyncpg>=0.29,<0.30       # alternative high-perf async driver
+
+# === LLM SDKs (install OpenAI client for default provider) ===
+openai>=1.55,<2
+# anthropic>=0.36,<0.37  # uncomment when Anthropic client is wired
+
+# === (Optional) Testing / tooling (uncomment if you want in runtime env) ===
+# pytest>=8.2,<9
+# pytest-asyncio>=0.23,<0.24
+# anyio>=4.4,<5            # aligns with httpx/fastapi async stack
+
+# === (Optional) RAG / Vector / Search (add later when you wire them) ===
+# opensearch-py>=2.6,<3
+# faiss-cpu>=1.8,<1.9       # platform-specific; pin only when needed
+# numpy>=1.26,<3            # required by faiss and some libs
+
+# === (Optional) Misc utilities ===
+# python-multipart>=0.0.9,<0.0.10   # if you handle file uploads
