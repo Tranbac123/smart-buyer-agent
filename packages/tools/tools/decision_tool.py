@@ -52,7 +52,7 @@ class DecisionTool:
         self.scorer = Scoring() # criteria will be injected per-call
         self.explainer = Explainer() # optionally can be given an LLM client later
     
-    async def call(self, playload: Dict[str, Any]) -> Dict[str, Any]:
+    async def call(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         # -------- Parse & validate input --------
         options: List[Dict[str, Any]] = _as_list_of_dicts(payload.get("options"))
         if not options:

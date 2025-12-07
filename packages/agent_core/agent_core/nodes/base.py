@@ -13,6 +13,7 @@ class BaseNode(ABC):
     async def run(self, state: AgentState, ctx: Dict[str, Any]) -> AgentState:
         t0 = time.perf_counter()
         error: Optional[str] = None
+        state.current_node = self.name
         input_snapshot: Dict[str, Any] = {
             "ctx": {k: v for k, v in (ctx or {}).items() if k not in {"secrets", "api_key"}},
             "facts_keys": list((state.facts or {}).keys()),
@@ -22,8 +23,7 @@ class BaseNode(ABC):
 
         try:
             if self.cost_per_call_tokens:
-                self.spent_tokens(state, self.cost_per_call_tokens)
-            
+                self.spend_tokens(state, self.cost_per_call_tokens)
             new_state = await self._run(state, ctx)
             output_snapshot = self._safe_output_snapshot(new_state)
             return new_state
@@ -41,6 +41,7 @@ class BaseNode(ABC):
                 output=output_snapshot,
                 error=error,
                 latency_ms=latancy_ms,
+                node=self.name,
             )
     @abstractmethod
     async def _run(self, state: AgentState, ctx: Dict[str, Any]) -> AgentState:
@@ -56,7 +57,7 @@ class BaseNode(ABC):
         state.use_tokens(n)
     
     def _safe_output_snapshot(self, state: AgentState) -> Dict[str, Any]:
-        facts_keys = list[str]((state.facts or {}).keys())
+        facts_keys = list((state.facts or {}).keys())
         out = {
             "facts_keys": facts_keys,
             "done": state.done,

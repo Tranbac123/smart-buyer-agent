@@ -12,8 +12,12 @@ from packages.tools.tools.registry import ToolRegistry
 from packages.llm_client.llm_client.base import ILLMClient  # Protocol-like
 from packages.memory_core.memory_core.base import IMemory  # optional
 from router.flows.smart_buyer_flow import SmartBuyerFlow
+from services.smart_buyer_formatter import render_smart_buyer_summary
 
 logger = logging.getLogger("quantumx.orchestrator")
+
+
+from packages.control_plane.control_plane.core import ControlPlane
 
 
 @dataclass(slots=True)
@@ -30,6 +34,7 @@ class OrchestratorService:
     """
 
     memory: Optional[IMemory] = None
+    control_plane: Optional[ControlPlane] = None
     default_timeout_s: float = 20.0
     default_budget_tokens: int = 16_000
     max_steps: int = 8  # reserved for future guards/policies
@@ -48,6 +53,10 @@ class OrchestratorService:
         http: Any,  # reserved for flows/tools that need an HTTP client
         request_id: str,
         timeout_s: Optional[float] = None,
+        user_id: Optional[str] = None,
+        org_id: Optional[str] = None,
+        role: Optional[str] = None,
+        channel: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Execute the SmartBuyer vertical slice (PriceCompare -> Decision -> Explain -> Finalize).
@@ -68,20 +77,43 @@ class OrchestratorService:
             session_id=request_id,
             query=q,
             facts={
+                "query": q,
                 "prefs": dict(prefs or {}),
                 "criteria": list(criteria or []),
             },
-            logs=[],
-            budget_tokens=self.default_budget_tokens,
+            log=[],
+            budget_token=self.default_budget_tokens,
             done=False,
+        )
+        state.metadata.update(
+            {
+                "request_id": request_id,
+                "user_id": user_id,
+                "org_id": org_id,
+                "role": role,
+                "channel": channel,
+                "flow_name": "smart_buyer",
+            }
         )
 
         # Flow + context
-        flow = SmartBuyerFlow(tools=tools, llm=llm, memory=self.memory, default_timeout_s=timeout_s or self.default_timeout_s)
+        flow = SmartBuyerFlow(
+            tools=tools,
+            llm=llm,
+            memory=self.memory,
+            control_plane=self.control_plane,
+            default_timeout_s=timeout_s or self.default_timeout_s,
+            default_max_steps=self.max_steps,
+        )
         ctx: Dict[str, Any] = {
             "top_k": int(top_k),
             "request_id": request_id,
             "timeout_s": float(timeout_s or self.default_timeout_s),
+            "user_id": user_id,
+            "org_id": org_id,
+            "role": role,
+            "channel": channel,
+            "flow_name": "smart_buyer",
         }
 
         try:
@@ -112,6 +144,11 @@ class OrchestratorService:
                 "metadata": {"request_id": request_id, "latency_ms": latency_ms, "flow": "smart_buyer"},
             }
 
+        result.setdefault("query", q)
+        summary_text = render_smart_buyer_summary(result, query=q)
+        if summary_text:
+            result["summary_text"] = summary_text
+
         return result
 
     # ------------- Internals -------------
@@ -139,6 +176,9 @@ class OrchestratorService:
             for k in ("offers", "scoring", "explanation"):
                 if k in extra:
                     payload[k] = extra[k]
+        summary_text = render_smart_buyer_summary(payload)
+        if summary_text:
+            payload["summary_text"] = summary_text
         return payload
 
 

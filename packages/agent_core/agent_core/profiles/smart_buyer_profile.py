@@ -52,8 +52,13 @@ class SmartBuyerProfile:
     Keep fields stable; add behavior via methods instead of exposing internals.
     """
 
+    # Flow identifier (used by planner fallbacks)
+    flow: str = "smart_buyer"
+
     # Which tools the flow is allowed to call
-    allow_tools: List[str] = field(default_factory=lambda: ["price_compare", "decision_score"])
+    allow_tools: List[str] = field(
+        default_factory=lambda: ["price_compare", "scraper_fetch", "decision_score"]
+    )
 
     # Soft resource limits
     budget_tokens: int = 12_000
@@ -71,6 +76,15 @@ class SmartBuyerProfile:
     )
 
     # ---- Public API ---------------------------------------------------------
+
+    @property
+    def allowed_tools(self) -> List[str]:
+        """Backwards-compatible alias for allow_tools."""
+        return list(self.allow_tools)
+
+    @allowed_tools.setter
+    def allowed_tools(self, tools: List[str]) -> None:
+        self.allow_tools = list(tools or [])
 
     def make_criteria(self, prefs: Optional[Dict[str, Any]] = None) -> List[CriterionTD]:
         """

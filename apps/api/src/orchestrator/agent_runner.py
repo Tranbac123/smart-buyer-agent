@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Protocol, runtime_checkable
 
 from packages.agent_core.agent_core.models import AgentState
-from packages.tools.tools.registry import ToolRegistry
+from packages.control_plane.control_plane.tool_registry import ToolRegistry
 from packages.llm_client.llm_client.base import ILLMClient
 from packages.memory_core.memory_core.base import IMemory
 
@@ -203,7 +203,7 @@ class AgentRunner:
                         "message": str(exc),
                     },
                 )
-            except Exception as exc:
+            except Exception as e:
                 last_exc = exc
                 self._logger.exception(
                     "agent_run.error",
@@ -233,7 +233,7 @@ class AgentRunner:
     ) -> None:
         try:
             ctx = await self.context_store.load(thread_id)  # type: ignore[union-attr]
-        except Exception as exc:
+        except Exception as e:
             self._logger.warning(
                 "agent_run.context_load_failed",
                 extra={
@@ -287,7 +287,7 @@ class AgentRunner:
                 "agent_run.context_saved",
                 extra={"trace_id": trace_id, "thread_id": thread_id},
             )
-        except Exception as exc:
+        except Exception as e:
             self._logger.warning(
                 "agent_run.context_save_failed",
                 extra={

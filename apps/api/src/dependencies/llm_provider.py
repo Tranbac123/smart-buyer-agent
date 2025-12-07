@@ -21,8 +21,8 @@ def _build_openai_client() -> Optional[ILLMClient]:
         return None
     try:
         from packages.llm_client.llm_client.openai_client import OpenAIClient  # type: ignore
-    except Exception as exc:  # pragma: no cover
-        logger.warning("OpenAI client import failed: %s", exc)
+    except Exception as e:  # pragma: no cover
+        logger.warning("OpenAI client import failed: %s", e)
         return None
     
     api_key = settings.OPENAI_API_KEY.get_secret_value() if settings.OPENAI_API_KEY else None

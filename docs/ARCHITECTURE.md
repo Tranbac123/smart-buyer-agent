@@ -253,6 +253,13 @@ quantumx-ai/
 │   │       ├── observer.py
 │   │       ├── reflector.py
 │   │       └── refiner.py
+│
+├── │-- control_plane/                        # Control and policy engine
+│   │       ├── control_plane.py        # ControlPlane class
+│   │       ├── policies.py             # PolicyEngine
+│   │       ├── tool_registry.py        # Tool metadata
+│   │       └── logging.py              # Execution log helpers
+│
 │   ├── search_core/                       # ⭐ Search & ranking
 │   │   ├── query_understanding.py
 │   │   ├── ranking.py

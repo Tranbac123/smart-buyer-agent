@@ -7,9 +7,9 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 from pydantic import BaseModel, Field, ValidationError, ConfigDict
 
-from agent_core.interfaces import ILLMClient, IMemory, IToolRegistry
-from agent_core.models import AgentState
-from agent_core.profiles.base_profile import BaseProfile
+from agent_core.agent_core.interfaces import ILLMClient, IMemory, IToolRegistry
+from agent_core.agent_core.models import AgentState
+from agent_core.agent_core.profiles.base_profile import BaseProfile
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class Planner:
 
     async def _ask_llm(self, sys: str, user: str) -> str:
         try:
-            rsp = await self.llm.complete(sys=sys, user=user, format="json")
+            rsp = await self.llm.complete(system=sys, user=user, format="json")
             if isinstance(rsp, str):
                 return rsp
             if hasattr(rsp, "text"):
@@ -221,6 +221,12 @@ class Planner:
                     name="price_compare",
                     tool="price_compare",
                     params={"top_k": 6},
+                ),
+                PlanStepModel(
+                    kind=PlanStepKind.TOOL,
+                    name="scraper_fetch",
+                    tool="scraper_fetch",
+                    params={},
                 ),
                 PlanStepModel(
                     kind=PlanStepKind.DECIDE,

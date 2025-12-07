@@ -5,6 +5,8 @@ from typing import Dict, Any, List, Optional
 from agent_core.agent_core.nodes.base import BaseNode
 from packages.agent_core.agent_core.models import AgentState
 from packages.tools.tools.registry import ToolRegistry
+from packages.control_plane.control_plane.core import ControlPlane, PlanStep
+from packages.control_plane.helpers import build_request_context, halt_state_with_error
 
 class DecisionNode(BaseNode):
     """
@@ -20,9 +22,16 @@ class DecisionNode(BaseNode):
     name = "decision"
     cost_per_call_tokens: int = 80 # optional: charge some tokens per call
 
-    def __init__(self, tools: ToolRegistry, *, tool_name: str = "decision_score") -> None:
+    def __init__(
+        self,
+        tools: ToolRegistry,
+        *,
+        tool_name: str = "decision_score",
+        control_plane: ControlPlane | None = None,
+    ) -> None:
         self.tools = tools
         self.tool_name = tool_name
+        self.control_plane = control_plane
     
     async def _run(self, state: AgentState, ctx: Dict[str, Any]) -> AgentState:
         offers: List[Dict[str, Any]] = list((state.facts or {}).get("offers") or [])
@@ -39,15 +48,16 @@ class DecisionNode(BaseNode):
         prefs: Dict[str, Any] = dict((state.facts or {}).get("prefs") or {})
         payload: Dict[str, Any] = {"options": offers, "criteria": criteria, "prefs": prefs}
 
-        # ---- Tool call ----
-        # Expected tool contract (MVP):
-        #   input : {"options": [...], "criteria": [...], "prefs": {...}}
-        #   output: {"scoring": {...}, "explanation": {...}}
-        res = await self.tools.call(self.tool_name, payload)
-        scoring: Dict[str, Any] = dict(res.get("scoring") or _default_scoring())
-        explanation: Dict[str, Any] = dict(
-            res.get("explanation") or _default_explanation(confidence=scoring.get("confidence", 0.0))
-        )
+        if self.control_plane:
+            data = await self._execute_via_control_plane(state, ctx, payload)
+            if data is None:
+                return state
+            scoring = dict(data.get("scoring") or _default_scoring())
+            explanation = dict(
+                data.get("explanation") or _default_explanation(confidence=scoring.get("confidence", 0.0))
+            )
+        else:
+            scoring, explanation = await self._execute_via_registry(state, payload)
 
         # Ensure a winner if missing (best rank == 1 or highest total_score)
         if explanation.get("winner") is None:
@@ -60,6 +70,65 @@ class DecisionNode(BaseNode):
         state.facts["scoring"] = scoring
         state.facts["explanation"] = explanation
         return state
+
+    async def _execute_via_registry(
+        self,
+        state: AgentState,
+        payload: Dict[str, Any],
+    ) -> tuple[Dict[str, Any], Dict[str, Any]]:
+        state.start_tool(self.tool_name)
+        try:
+            res = await self.tools.call(self.tool_name, payload)
+        finally:
+            state.end_tool()
+        scoring = dict(res.get("scoring") or _default_scoring())
+        explanation = dict(
+            res.get("explanation") or _default_explanation(confidence=scoring.get("confidence", 0.0))
+        )
+        return scoring, explanation
+
+    async def _execute_via_control_plane(
+        self,
+        state: AgentState,
+        ctx: Dict[str, Any],
+        payload: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+        if not self.control_plane:
+            return None
+
+        step = PlanStep(
+            action=self.tool_name,
+            parameters={
+                "options": payload["options"],
+                "criteria": payload.get("criteria"),
+                "prefs": payload.get("prefs"),
+            },
+            context={"intent": "decision_score"},
+        )
+        req_ctx = build_request_context(
+            state,
+            overrides={
+                "request_id": ctx.get("request_id"),
+                "user_id": ctx.get("user_id"),
+                "org_id": ctx.get("org_id"),
+                "role": ctx.get("role"),
+                "channel": ctx.get("channel"),
+                "flow_name": ctx.get("flow_name"),
+            },
+        )
+        result = await self.control_plane.execute(step, req_ctx)
+        if not result.success:
+            halt_state_with_error(
+                state,
+                reason=result.extra.get("error_type") or "tool_error",
+                message=result.error,
+                tool=self.tool_name,
+            )
+            return None
+        data = result.data or {}
+        if hasattr(data, "model_dump"):
+            data = data.model_dump()
+        return data
 
 # Helpers
 def _default_scoring() -> Dict[str, Any]:

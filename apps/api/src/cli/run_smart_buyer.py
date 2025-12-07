@@ -2,10 +2,11 @@ from __future__ import annotations
 import argparse, asyncio, os, json
 os.environ.setdefault("PYTHONPATH", os.getcwd())
 
-from orchestrator.orchestrator_service import OrchestratorService
+from services.orchestrator_service import OrchestratorService
 from dependencies.tools_provider import get_tool_registry
 from dependencies.llm_provider import get_llm
 from dependencies.http_client_provider import _build_shared_httpx_client
+from packages.control_plane.bootstrap import get_control_plane
 
 async def main():
     p = argparse.ArgumentParser()
@@ -24,8 +25,9 @@ async def main():
     tools = get_tool_registry()
     llm = get_llm()
     http = _build_shared_httpx_client()
+    control_plane = get_control_plane()
 
-    svc = OrchestratorService()
+    svc = OrchestratorService(control_plane=control_plane)
     res = await svc.run_smart_buyer(
         query=args.query,
         top_k=args.top_k,
@@ -36,6 +38,7 @@ async def main():
         http=http,
         request_id="cli-run",
         timeout_s=args.timeout,
+        channel="cli",
     )
     print(json.dumps(res, ensure_ascii=False, indent=2))
 

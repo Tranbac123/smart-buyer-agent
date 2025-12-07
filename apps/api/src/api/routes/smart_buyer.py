@@ -13,6 +13,7 @@ from services.smart_buyer_service import SmartBuyerService
 from dependencies.tools_provider import get_tool_registry
 from dependencies.llm_provider import get_llm
 from dependencies.http_client_provider import get_http_client
+from dependencies.orchestrator_provider import get_orchestrator_service
 from services.orchestrator_service import OrchestratorService
 
 
@@ -36,10 +37,11 @@ class SmartBuyerRequest(BaseModel):
     query: str = Field(min_length=2)
     top_k: conint(ge=1, le=20) = 6
     prefs: Optional[PreferencesIn] = None
-    criteria: Optional[conlist(CriterionIn, min_items=1)] = None
+    criteria: Optional[conlist(CriterionIn, min_length=1)] = None
 
 
 class OfferOut(BaseModel):
+    id: Optional[str] = None
     site: str
     title: str
     price: Decimal
@@ -79,6 +81,7 @@ class SmartBuyerResponse(BaseModel):
     scoring: ScoringOut
     explanation: ExplanationOut
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    summary_text: Optional[str] = None
 
 
 def _correlation_id(x_request_id: Optional[str]) -> str:
@@ -89,7 +92,7 @@ def _correlation_id(x_request_id: Optional[str]) -> str:
 async def smart_buyer(
     req: SmartBuyerRequest,
     request: Request,
-    svc: OrchestratorService = Depends(OrchestratorService),
+    svc: OrchestratorService = Depends(get_orchestrator_service),
     tools=Depends(get_tool_registry),
     llm=Depends(get_llm),
     http=Depends(get_http_client),
@@ -97,6 +100,11 @@ async def smart_buyer(
 ):
     started = time.perf_counter()
     rid = _correlation_id(x_request_id)
+
+    user_id = request.headers.get("x-user-id")
+    org_id = request.headers.get("x-org-id")
+    role = request.headers.get("x-user-role")
+    channel = request.headers.get("x-channel") or "web"
 
     try:
         result = await svc.run_smart_buyer(
@@ -108,6 +116,10 @@ async def smart_buyer(
             llm=llm,
             http=http,
             request_id=rid,
+            user_id=user_id,
+            org_id=org_id,
+            role=role,
+            channel=channel,
         )
     except HTTPException:
         raise
@@ -120,6 +132,23 @@ async def smart_buyer(
     scoring_raw = result.get("scoring", {})
     explanation_raw = result.get("explanation", {})
     metadata = result.get("metadata", {})
+
+    halt_reason = metadata.get("halt_reason") or metadata.get("error")
+    if halt_reason:
+        status_map = {
+            "quota_exceeded": status.HTTP_429_TOO_MANY_REQUESTS,
+            "tool_blocked": status.HTTP_403_FORBIDDEN,
+            "skill_not_allowed": status.HTTP_403_FORBIDDEN,
+            "tool_error": status.HTTP_502_BAD_GATEWAY,
+        }
+        raise HTTPException(
+            status_code=status_map.get(halt_reason, status.HTTP_400_BAD_REQUEST),
+            detail={
+                "error": halt_reason,
+                "message": metadata.get("message"),
+                "request_id": rid,
+            },
+        )
 
     scoring = ScoringOut(
         best=scoring_raw.get("best"),
@@ -151,4 +180,5 @@ async def smart_buyer(
         scoring=scoring,
         explanation=explanation,
         metadata=metadata | {"top_k": req.top_k},
+        summary_text=result.get("summary_text"),
     )

@@ -6,11 +6,11 @@ Entry point for routing requests to appropriate flows/agents
 from typing import Dict, Any, Optional, Union
 from enum import Enum
 
-from .flows.base_flow import BaseFlow
-from .flows.chat_flow import ChatFlow
-from .flows.deep_research_flow import DeepResearchFlow
-from .flows.smart_buyer_flow import SmartBuyerFlow
-from .flows.code_agent_flow import CodeAgentFlow
+from router.flows.base_flow import BaseFlow
+from router.flows.chat_flow import ChatFlow
+from router.flows.deep_research_flow import DeepResearchFlow
+from router.flows.smart_buyer_flow import SmartBuyerFlow
+from router.flows.code_agent_flow import CodeAgentFlow
 
 
 class Intent(Enum):

@@ -18,6 +18,15 @@ try:
 except Exception:  # pragma: no cover
     DecisionTool = None  # type: ignore
 
+try:
+    from packages.tools.tools.scraper_tool import ScraperTool  # type: ignore
+except Exception:  # pragma: no cover
+    ScraperTool = None  # type: ignore
+
+try:
+    from packages.tools.tools.search_web import WebSearchTool  # type: ignore
+except Exception:  # pragma: no cover
+    WebSearchTool = None  # type: ignore
 
 # Process-wide singleton. FastAPI will call our dependency per-request,
 # but we only build the registry once.
@@ -40,6 +49,14 @@ def _register_core_tools(reg: ToolRegistry) -> None:
     if DecisionTool is not None and (not feats or feats.enable_smart_buyer):
         if "decision_score" not in reg._tools:
             reg.register("decision_score", DecisionTool())
+
+    if ScraperTool is not None and (not feats or feats.enable_smart_buyer):
+        if "scraper_fetch" not in reg._tools:
+            reg.register("scraper_fetch", ScraperTool())
+
+    if WebSearchTool is not None and (not feats or feats.enable_smart_buyer):
+        if "web_search" not in reg._tools:
+            reg.register("web_search", WebSearchTool())
 
 
 def get_tool_registry() -> ToolRegistry:

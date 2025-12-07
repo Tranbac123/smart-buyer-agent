@@ -145,20 +145,15 @@ source ~/.bashrc
 
 ```bash
 # This also works but PYTHONPATH is simpler
-pip install -e packages/agent_core
-pip install -e packages/search_core
-pip install -e packages/decision_core
-pip install -e packages/tools
-pip install -e packages/llm_client
-pip install -e packages/memory_core
-pip install -e packages/shared
-```
+pip install -e .
+# check import OK
+python3 -c "import agent_core, memory_core, tools, decision_core, search_core; print('OK')"
 
 ### Step 4: Install Backend Dependencies
 
 ```bash
 # Install from requirements.txt
-pip install -r apps/api/requirements.txt
+pip install -r requirements.txt
 
 # Verify installation
 pip list | grep fastapi

@@ -4,10 +4,12 @@
 
 Intelligent shopping assistant that compares prices across Vietnamese e-commerce platforms (Shopee, Lazada, Tiki), scores options using multi-criteria algorithms, and explains trade-offs with human-like reasoning.
 
-[![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-blue)](CLEAN_ARCHITECTURE_4_LAYERS.md)
-[![Style](https://img.shields.io/badge/Style-LangGraph-green)](DATAFLOW.md)
-[![Docs](https://img.shields.io/badge/Docs-Enterprise%20Grade-brightgreen)](DOCUMENTATION_INDEX.md)
-[![Status](https://img.shields.io/badge/Status-MVP%20Ready-orange)](DEVELOP_PLAN.md)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-blue)](docs/CLEAN_ARCHITECTURE_4_LAYERS.md)
+[![Style](https://img.shields.io/badge/Style-LangGraph-green)](docs/DATAFLOW.md)
+[![Docs](https://img.shields.io/badge/Docs-Enterprise%20Grade-brightgreen)](docs/DOCUMENTATION_INDEX.md)
+[![Status](https://img.shields.io/badge/Status-MVP%20Ready-orange)](docs/DEVELOP_PLAN.md)
+
+> 📁 **Documentation lives under [`docs/`](docs/DOCUMENTATION_INDEX.md)** — every guide, plan, and reference has been consolidated there for easy navigation.
 
 ---
 
@@ -16,14 +18,14 @@ Intelligent shopping assistant that compares prices across Vietnamese e-commerce
 ### **🏆 Enterprise-Grade Documentation**
 This project features **10 comprehensive documents** (8,500+ lines) covering everything from quick start to advanced architecture concepts:
 
-📚 **[Master Documentation Index](DOCUMENTATION_INDEX.md)** - Start here to navigate all documentation
+📚 **[Master Documentation Index](docs/DOCUMENTATION_INDEX.md)** - Start here to navigate all documentation
 
 **Key docs:**
-- 🚀 [Quick Start Guide](RUN_GUIDE.md) - Get running in 5 minutes
-- 🏗️ [System Architecture](ARCHITECTURE.md) - Production-ready design
-- 🧠 [12 Core Concepts](12_concepts.md) - Master the principles
-- 🔄 [Behavior Architecture](BEHAVIOR_ARCHITECTURE.md) - Runtime patterns
-- 📐 [Clean Architecture](CLEAN_ARCHITECTURE_4_LAYERS.md) - Layer separation
+- 🚀 [Quick Start Guide](docs/RUN_GUIDE.md) - Get running in 5 minutes
+- 🏗️ [System Architecture](docs/ARCHITECTURE.md) - Production-ready design
+- 🧠 [12 Core Concepts](docs/12_concepts.md) - Master the principles
+- 🔄 [Behavior Architecture](docs/BEHAVIOR_ARCHITECTURE.md) - Runtime patterns
+- 📐 [Clean Architecture](docs/CLEAN_ARCHITECTURE_4_LAYERS.md) - Layer separation
 
 ### **🤖 LangGraph-Style Multi-Agent Reasoning**
 Not just a chatbot—an intelligent agent system with:
@@ -87,7 +89,7 @@ cd apps/web-app && npm run dev
 - 📡 **API Docs**: http://localhost:8000/docs
 - ❤️ **Health Check**: http://localhost:8000/v1/healthz
 
-**Need help?** See the complete [RUN_GUIDE.md](RUN_GUIDE.md)
+**Need help?** See the complete [RUN_GUIDE.md](docs/RUN_GUIDE.md)
 
 ---
 
@@ -98,7 +100,7 @@ cd apps/web-app && npm run dev
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    User Query                                │
-│          "So sánh giá iPhone 15 Pro"                        │
+│          "So sánh giá iPhone 17 Pro Max"                        │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼
@@ -135,7 +137,7 @@ cd apps/web-app && npm run dev
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**See full details**: [ARCHITECTURE.md](ARCHITECTURE.md) | [DATAFLOW.md](DATAFLOW.md) | [BEHAVIOR_ARCHITECTURE.md](BEHAVIOR_ARCHITECTURE.md)
+**See full details**: [ARCHITECTURE.md](docs/ARCHITECTURE.md) | [DATAFLOW.md](docs/DATAFLOW.md) | [BEHAVIOR_ARCHITECTURE.md](docs/BEHAVIOR_ARCHITECTURE.md)
 
 ---
 
@@ -262,7 +264,7 @@ quantumx-ai/
 
 ## 📚 Documentation
 
-### **🌟 [Master Documentation Index](DOCUMENTATION_INDEX.md)** ⭐
+### **🌟 [Master Documentation Index](docs/DOCUMENTATION_INDEX.md)** ⭐
 
 Your complete guide to all project documentation with:
 - 📖 **10 comprehensive documents** (8,500+ lines)
@@ -279,15 +281,15 @@ Your complete guide to all project documentation with:
 
 | I want to... | Read this | Time |
 |--------------|-----------|------|
-| **Get it running** | [RUN_GUIDE.md](RUN_GUIDE.md) | 15 min |
-| **Understand architecture** | [ARCHITECTURE.md](ARCHITECTURE.md) | 20 min |
-| **Learn layer structure** | [CLEAN_ARCHITECTURE_4_LAYERS.md](CLEAN_ARCHITECTURE_4_LAYERS.md) | 25 min |
-| **See data flow** | [DATAFLOW.md](DATAFLOW.md) | 20 min |
-| **Understand behaviors** | [BEHAVIOR_ARCHITECTURE.md](BEHAVIOR_ARCHITECTURE.md) | 30 min |
-| **Master concepts** | [12_concepts.md](12_concepts.md) | 45 min |
-| **Build features** | [DEVELOP_PLAN.md](DEVELOP_PLAN.md) | 20 min |
-| **Check file status** | [CODE_INVENTORY.md](CODE_INVENTORY.md) | 15 min |
-| **Fix bugs** | [FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md](FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md) | 15 min |
+| **Get it running** | [RUN_GUIDE.md](docs/RUN_GUIDE.md) | 15 min |
+| **Understand architecture** | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 20 min |
+| **Learn layer structure** | [CLEAN_ARCHITECTURE_4_LAYERS.md](docs/CLEAN_ARCHITECTURE_4_LAYERS.md) | 25 min |
+| **See data flow** | [DATAFLOW.md](docs/DATAFLOW.md) | 20 min |
+| **Understand behaviors** | [BEHAVIOR_ARCHITECTURE.md](docs/BEHAVIOR_ARCHITECTURE.md) | 30 min |
+| **Master concepts** | [12_concepts.md](docs/12_concepts.md) | 45 min |
+| **Build features** | [DEVELOP_PLAN.md](docs/DEVELOP_PLAN.md) | 20 min |
+| **Check file status** | [CODE_INVENTORY.md](docs/CODE_INVENTORY.md) | 15 min |
+| **Fix bugs** | [FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md](docs/FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md) | 15 min |
 
 **Total documentation**: ~4 hours of reading for complete mastery
 
@@ -334,7 +336,7 @@ Query → Plan → Search → Analyze → Score → Explain → Recommend
 | **Documentation** | ✅ Complete | 8,500+ lines, enterprise-grade |
 | **MVP** | 🚧 In Progress | 4-8 hours to completion |
 
-**See detailed status**: [CODE_INVENTORY.md](CODE_INVENTORY.md)
+**See detailed status**: [CODE_INVENTORY.md](docs/CODE_INVENTORY.md)
 
 ---
 
@@ -364,21 +366,21 @@ open http://localhost:8000/docs   # API documentation
 ## 🎓 Learning Resources
 
 ### **New to the Project?**
-1. Start with [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
+1. Start with [DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)
 2. Follow the **Developer Onboarding** path (6 hours total)
-3. Read [RUN_GUIDE.md](RUN_GUIDE.md) to get it running
-4. Explore [ARCHITECTURE.md](ARCHITECTURE.md) to understand design
+3. Read [RUN_GUIDE.md](docs/RUN_GUIDE.md) to get it running
+4. Explore [ARCHITECTURE.md](docs/ARCHITECTURE.md) to understand design
 
 ### **Want to Contribute?**
-1. Read [DEVELOP_PLAN.md](DEVELOP_PLAN.md) for roadmap
-2. Check [CODE_INVENTORY.md](CODE_INVENTORY.md) for what needs work
-3. Review [CLEAN_ARCHITECTURE_4_LAYERS.md](CLEAN_ARCHITECTURE_4_LAYERS.md) for where code goes
-4. Apply fixes from [FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md](FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md)
+1. Read [DEVELOP_PLAN.md](docs/DEVELOP_PLAN.md) for roadmap
+2. Check [CODE_INVENTORY.md](docs/CODE_INVENTORY.md) for what needs work
+3. Review [CLEAN_ARCHITECTURE_4_LAYERS.md](docs/CLEAN_ARCHITECTURE_4_LAYERS.md) for where code goes
+4. Apply fixes from [FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md](docs/FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md)
 
 ### **Want to Learn AI Agent Architecture?**
-1. Read [12_concepts.md](12_concepts.md) - Master the fundamentals
-2. Read [DATAFLOW.md](DATAFLOW.md) - See LangGraph-style flow
-3. Read [BEHAVIOR_ARCHITECTURE.md](BEHAVIOR_ARCHITECTURE.md) - Understand runtime
+1. Read [12_concepts.md](docs/12_concepts.md) - Master the fundamentals
+2. Read [DATAFLOW.md](docs/DATAFLOW.md) - See LangGraph-style flow
+3. Read [BEHAVIOR_ARCHITECTURE.md](docs/BEHAVIOR_ARCHITECTURE.md) - Understand runtime
 4. Study the actual code in `packages/agent_core/`
 
 ---
@@ -409,7 +411,7 @@ AgentState → Node → Node → Node → Output
 - **State management** for reasoning
 - **Fail-soft** for reliability
 
-**Read more**: [CLEAN_ARCHITECTURE_4_LAYERS.md](CLEAN_ARCHITECTURE_4_LAYERS.md)
+**Read more**: [CLEAN_ARCHITECTURE_4_LAYERS.md](docs/CLEAN_ARCHITECTURE_4_LAYERS.md)
 
 ---
 
@@ -446,7 +448,7 @@ for node in nodes:
 }
 ```
 
-**Learn more**: [DATAFLOW.md](DATAFLOW.md)
+**Learn more**: [DATAFLOW.md](docs/DATAFLOW.md)
 
 ---
 
@@ -494,7 +496,7 @@ Status:
 - Redis caching
 - Enhanced ranking
 
-**See roadmap**: [DEVELOP_PLAN.md](DEVELOP_PLAN.md)
+**See roadmap**: [DEVELOP_PLAN.md](docs/DEVELOP_PLAN.md)
 
 ---
 
@@ -535,7 +537,7 @@ open http://localhost:3000
 
 **Time to MVP**: 4-8 hours of focused work
 
-**Detailed roadmap**: [DEVELOP_PLAN.md](DEVELOP_PLAN.md)
+**Detailed roadmap**: [DEVELOP_PLAN.md](docs/DEVELOP_PLAN.md)
 
 ---
 
@@ -560,7 +562,7 @@ This project features **enterprise-grade documentation**:
 - ✅ **Code examples** (From actual system)
 - ✅ **Troubleshooting** (8+ common issues)
 
-**Explore all docs**: [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
+**Explore all docs**: [DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)
 
 ---
 
@@ -601,16 +603,16 @@ This project features **enterprise-grade documentation**:
 ## 🔗 Important Links
 
 ### **Documentation**
-- 📚 [Master Index](DOCUMENTATION_INDEX.md) - Start here!
-- 🚀 [Run Guide](RUN_GUIDE.md) - Setup & operations
-- 🏗️ [Architecture](ARCHITECTURE.md) - System design
-- 🧠 [Core Concepts](12_concepts.md) - Learn principles
-- 📐 [Clean Architecture](CLEAN_ARCHITECTURE_4_LAYERS.md) - Layer guide
+- 📚 [Master Index](docs/DOCUMENTATION_INDEX.md) - Start here!
+- 🚀 [Run Guide](docs/RUN_GUIDE.md) - Setup & operations
+- 🏗️ [Architecture](docs/ARCHITECTURE.md) - System design
+- 🧠 [Core Concepts](docs/12_concepts.md) - Learn principles
+- 📐 [Clean Architecture](docs/CLEAN_ARCHITECTURE_4_LAYERS.md) - Layer guide
 
 ### **Development**
-- 🗺️ [Development Plan](DEVELOP_PLAN.md) - Roadmap
-- 📋 [Code Inventory](CODE_INVENTORY.md) - File status
-- 🔧 [Bug Fixes](FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md) - Known issues
+- 🗺️ [Development Plan](docs/DEVELOP_PLAN.md) - Roadmap
+- 📋 [Code Inventory](docs/CODE_INVENTORY.md) - File status
+- 🔧 [Bug Fixes](docs/FIXES_FOR_LANGGRAPH_ORCHESTRATOR.md) - Known issues
 
 ### **Live Endpoints** (when running)
 - Frontend: http://localhost:3000
@@ -623,10 +625,10 @@ This project features **enterprise-grade documentation**:
 
 ### **Getting Help**
 
-1. **Documentation**: Check [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) first
+1. **Documentation**: Check [DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md) first
 2. **Troubleshooting**: See [RUN_GUIDE.md#troubleshooting](RUN_GUIDE.md#troubleshooting)
-3. **Architecture questions**: Read [ARCHITECTURE.md](ARCHITECTURE.md) or [12_concepts.md](12_concepts.md)
-4. **Implementation help**: Review [DEVELOP_PLAN.md](DEVELOP_PLAN.md)
+3. **Architecture questions**: Read [ARCHITECTURE.md](docs/ARCHITECTURE.md) or [12_concepts.md](docs/12_concepts.md)
+4. **Implementation help**: Review [DEVELOP_PLAN.md](docs/DEVELOP_PLAN.md)
 
 ### **Common Issues**
 - Import errors? → [RUN_GUIDE.md - Issue 1](RUN_GUIDE.md#1-import-errors-critical)
@@ -664,7 +666,7 @@ Built with passion for intelligent, explainable AI systems.
 
 **⭐ If you find this project valuable, please star it!**
 
-**📚 Start exploring**: [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
+**📚 Start exploring**: [DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)
 
 ---
 

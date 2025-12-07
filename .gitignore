@@ -1,0 +1,73 @@
+### OS / Editor / IDE
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+.pytest_cache/
+
+### Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+.python-version
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+*.egg
+
+### Node / Frontend (monorepo root)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+package-lock.json
+
+### Next.js (root-level caches if any)
+.next/
+out/
+
+### Environment / Secrets
+.env
+.env.*
+# or if you are very sure:
+# **/.env
+# **/.env.*
+
+# Keep template env files under version control
+!.env.example
+!apps/api/.env.example
+!apps/web-app/.env.local.example
+
+### Local data / runtime artifacts
+*.sqlite3
+*.db
+/infra/migrations/*.log
+
+### Coverage / test output
+.coverage
+coverage/
+htmlcov/
+pytest.xml
+test-results/
+
+### Cache directories
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+
+
+# Local env files
+apps/api/src/.env

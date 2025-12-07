@@ -103,7 +103,7 @@ class JsonFileContextStore(BaseContextStore):
                 if isinstance(raw, dict):
                     return raw
                 return {}
-            except Exception as exc:
+            except Exception as e:
                 logger.warning(
                     "context_store.json.load_failed",
                     extra={
@@ -127,7 +127,7 @@ class JsonFileContextStore(BaseContextStore):
                     encoding="utf-8",
                 )
                 tmp_path.replace(path)
-            except Exception as exc:
+            except Exception as e:
                 logger.warning(
                     "context_store.json.save_failed",
                     extra={

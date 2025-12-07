@@ -5,6 +5,18 @@ import os
 import sys
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]     # quantumx-ai/
+SRC = ROOT / "apps" / "api" / "src"
+
+def _add_path(path: Path):
+    p = str(path)
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+_add_path(ROOT)
+_add_path(SRC)
 
 
 import httpx
@@ -12,6 +24,10 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
+
+# Correct use: Call load_dotenv() as early as possible, before importing settings or anything relying on env vars.
+from dotenv import load_dotenv
+load_dotenv()
 
 # --- Optional imports (graceful if not present) ---
 try:
@@ -46,6 +62,7 @@ except Exception: # pragma: no cover
         HTTPX_MAX_KEEPALIVE: int = 20
         HTTPX_LIMIT: tuple[int, int] = (100, 100) # (max_keepalive, max_connections)
         ENV: str = os.getenv("ENV", "dev")
+    settings = _fallback_settings()
 
 # --- Logging bootstrap (simple, override via uvicorn config in prod) ---
 logging.basicConfig(
@@ -106,7 +123,6 @@ def create_app() -> FastAPI:
         title=getattr(settings, "APP_NAME", "QuantumX API"),
         version=getattr(settings, "APP_VERSION", "v1.0"),
         docs_url=getattr(settings, "DOCS_URL", "/docs"),
-        docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
         lifespan=lifespan,
@@ -121,7 +137,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
         expose_headers=["x-request-id"],
     )
-    app.add_middleware("http")(request_id_middleware)
+    app.middleware("http")(request_id_middleware)
 
     # Error handlers (optional module)
     if register_exception_handlers:

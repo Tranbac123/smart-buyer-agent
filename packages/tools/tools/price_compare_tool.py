@@ -22,7 +22,6 @@ import math
 import logging
 import inspect
 
-
 logger = logging.getLogger("quantumx.tools.price_compare")
 
 
@@ -67,7 +66,7 @@ class PriceCompareTool:
         deny_sites: Optional[Sequence[str]] = None,
     ) -> None:
         if engine is None:
-            if priceCompareEngine is None:
+            if PriceCompareEngine is None:
                 raise RuntimeError(
                     "PriceCompareTool: PriceCompareEngine is not available. "
                     "Ensure 'packages.search_core.search_core.ecommerce.price_compare' is importable."
@@ -133,7 +132,7 @@ class PriceCompareTool:
                 
                 # Validate engine result shape
                 offers, metadata = _coerce_engine_result(res)
-                meta = self._meta(t0, sites=sites, attempt=attempt, engine_meta=metadata)
+                meta = self._meta(t0, sites=sites, attempts=attempt + 1, engine_meta=metadata)
 
                 # Success → reset CB and return
                 self._cb_record_success()
@@ -151,8 +150,13 @@ class PriceCompareTool:
                 await asyncio.sleep(self._backoff_secs(attempt))
         # All attempts failed → open circuit, return fail-soft
         self._cb_record_failure()
-        self._cb_mayby_open()
-        return {"offers": [], "metadata": self._meta(t0, sites=sites, attempt=attempts, error=last_error or "unknown_error")}
+        self._cb_maybe_open()
+        return {"offers": [], "metadata": self._meta(
+            t0,
+            sites=sites,
+            attempts=attempts,
+            error=last_error or "unknown_error",
+        )}
 
     # --------------------------------------------------------------------- #
     # Internals
