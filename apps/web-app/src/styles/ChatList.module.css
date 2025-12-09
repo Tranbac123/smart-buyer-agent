@@ -1,0 +1,82 @@
+/* Chat List Styles */
+
+.list {
+  list-style: none;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+.item {
+  margin-bottom: 0.5rem;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+
+.link:hover {
+  background: var(--bg-secondary);
+}
+
+.link.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 0.25rem;
+}
+
+.deleteButton {
+  opacity: 0;
+  padding: 0.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.link:hover .deleteButton {
+  opacity: 1;
+}
+
+.deleteButton:hover {
+  background: var(--bg-hover);
+  color: #ef4444;
+}
+
+.deleteIcon {
+  width: 16px;
+  height: 16px;
+}
