@@ -4,6 +4,7 @@
  */
 
 import type { Message } from "@/types/chat";
+import styles from "@/styles/MessageBubble.module.css";
 
 interface MessageBubbleProps {
   message: Message;
@@ -18,21 +19,12 @@ export default function MessageBubble({
   const isAssistant = message.role === "assistant";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`
-          max-w-[80%] rounded-lg px-4 py-3
-          ${
-            isUser
-              ? "bg-blue-600 text-white"
-              : "bg-white border border-gray-200 text-gray-900"
-          }
-        `}
-      >
+    <div className={`${styles.container} ${isUser ? styles.user : styles.assistant}`}>
+      <div className={`${styles.bubble} ${isUser ? styles.user : styles.assistant}`}>
         {/* Content */}
-        <div className="prose prose-sm max-w-none">
+        <div className={`${styles.content} prose`}>
           {message.content.split("\n").map((line, i) => (
-            <p key={i} className={isUser ? "text-white" : "text-gray-900"}>
+            <p key={i}>
               {line || <br />}
             </p>
           ))}
@@ -40,29 +32,23 @@ export default function MessageBubble({
 
         {/* Streaming indicator */}
         {isStreaming && (
-          <div className="flex gap-1 mt-2">
-            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-            <div
-              className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-              style={{ animationDelay: "0.1s" }}
-            />
-            <div
-              className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-              style={{ animationDelay: "0.2s" }}
-            />
+          <div className={styles.streamingIndicator}>
+            <div className={styles.streamingDot} />
+            <div className={styles.streamingDot} />
+            <div className={styles.streamingDot} />
           </div>
         )}
 
         {/* Metadata - for Smart Buyer responses */}
         {isAssistant && message.metadata && (
-          <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className={styles.metadata}>
             {/* Intent/Flow Type */}
             {(message.metadata.intent || message.metadata.flow_type) && (
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-medium text-gray-500">
+              <div className={styles.flowType}>
+                <span className={styles.flowIcon}>
                   {getFlowIcon(message.metadata.flow_type || message.metadata.intent)}
                 </span>
-                <span className="text-xs text-gray-600">
+                <span>
                   {formatFlowType(message.metadata.flow_type || message.metadata.intent)}
                 </span>
               </div>
@@ -71,37 +57,38 @@ export default function MessageBubble({
             {/* Top Recommendations */}
             {message.metadata.top_recommendations &&
               message.metadata.top_recommendations.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  <div className="text-xs font-semibold text-gray-700">
+                <div className={styles.recommendations}>
+                  <div className={styles.recommendationsTitle}>
                     Top Recommendations:
                   </div>
-                  {message.metadata.top_recommendations.slice(0, 3).map((rec: any, i: number) => (
-                    <div
-                      key={i}
-                      className="bg-gray-50 rounded p-2 text-xs space-y-1"
-                    >
-                      <div className="font-medium">
-                        #{rec.rank} - Score: {rec.score?.toFixed(2)}
-                      </div>
-                      {rec.product && (
-                        <div className="text-gray-600">
-                          {rec.product.name} - {rec.product.price?.toLocaleString()} VNĐ
+                  {message.metadata.top_recommendations.slice(0, 3).map(
+                    (rec: any, i: number) => (
+                      <div
+                        key={i}
+                        className={styles.recommendationCard}
+                      >
+                        <div className={styles.recommendationRank}>
+                          #{rec.rank ?? i + 1}{" "}
+                          {typeof rec.score === "number"
+                            ? `- Score: ${rec.score.toFixed(2)}`
+                            : null}
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        {rec.product && (
+                          <div className={styles.recommendationDetails}>
+                            {rec.product.name}
+                            {formatPrice(rec.product.price)}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
               )}
           </div>
         )}
 
         {/* Timestamp */}
-        <div
-          className={`
-            text-xs mt-2
-            ${isUser ? "text-blue-100" : "text-gray-500"}
-          `}
-        >
+        <div className={styles.timestamp}>
           {formatTime(message.timestamp)}
         </div>
       </div>
@@ -143,4 +130,15 @@ function formatFlowType(flowType: string): string {
     default:
       return flowType;
   }
+}
+
+function formatPrice(value?: number | string | null): string {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return ` - ${value.toLocaleString()} VND`;
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    return ` - ${value.trim()}`;
+  }
+  return "";
 }

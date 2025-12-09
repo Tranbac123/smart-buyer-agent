@@ -30,7 +30,7 @@ This installs:
 cp .env.local.example .env.local
 
 # Edit if needed (default is fine for local dev)
-# NEXT_PUBLIC_API_URL=http://localhost:8000
+# NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ---

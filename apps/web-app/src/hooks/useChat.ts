@@ -4,111 +4,111 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { storage } from "@/lib/storage";
-import { sendMessage } from "@/lib/api";
-import type { Message } from "@/types/chat";
+import { sendSmartBuyerChat } from "@/lib/api";
+import type { Message, SmartBuyerChatMessage } from "@/types/chat";
 import { useChatHistory } from "./useChatHistory";
 
 const getChatKey = (sessionId: string) => `qx.chat.history.${sessionId}`;
 
+type PersistedChatState = {
+  messages: Message[];
+  conversationId?: string;
+};
+
+const emptyState: PersistedChatState = { messages: [] };
+
+function parsePersistedState(
+  value: PersistedChatState | Message[]
+): PersistedChatState {
+  if (Array.isArray(value)) {
+    return { messages: value };
+  }
+  if (value && Array.isArray(value.messages)) {
+    return { messages: value.messages, conversationId: value.conversationId };
+  }
+  return emptyState;
+}
+
 export function useChat(sessionId: string) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversationId, setConversationId] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [streamingMessage, setStreamingMessage] = useState<string>("");
   const abortControllerRef = useRef<AbortController | null>(null);
   const { updateLastMessage, updateTitle } = useChatHistory();
 
-  // Load messages from localStorage on mount
   useEffect(() => {
     if (!sessionId) return;
-    
-    const saved = storage.get<Message[]>(getChatKey(sessionId), []);
-    setMessages(saved);
+    const saved = storage.get<PersistedChatState | Message[]>(
+      getChatKey(sessionId),
+      emptyState
+    );
+    const parsed = parsePersistedState(saved);
+    setMessages(parsed.messages);
+    setConversationId(parsed.conversationId);
   }, [sessionId]);
 
-  // Save messages to localStorage whenever they change
-  const saveMessages = useCallback(
-    (msgs: Message[]) => {
+  const persistState = useCallback(
+    (msgs: Message[], nextConversationId: string | undefined = conversationId) => {
       if (!sessionId) return;
       setMessages(msgs);
-      storage.set(getChatKey(sessionId), msgs);
+      setConversationId(nextConversationId);
+      storage.set(getChatKey(sessionId), {
+        messages: msgs,
+        conversationId: nextConversationId,
+      });
       updateLastMessage(sessionId);
     },
-    [sessionId, updateLastMessage]
+    [sessionId, conversationId, updateLastMessage]
   );
 
-  // Auto-generate title from first message
   useEffect(() => {
     if (messages.length === 1 && messages[0].role === "user") {
       const firstMessage = messages[0].content;
-      const title = firstMessage.length > 50
-        ? firstMessage.slice(0, 50) + "..."
-        : firstMessage;
+      const title =
+        firstMessage.length > 50 ? `${firstMessage.slice(0, 50)}...` : firstMessage;
       updateTitle(sessionId, title);
     }
   }, [messages, sessionId, updateTitle]);
 
-  /**
-   * Send a message
-   */
   const send = useCallback(
-    async (content: string, context?: any) => {
+    async (content: string) => {
       if (!content.trim() || isLoading) return;
 
       setError(null);
       setIsLoading(true);
-      setStreamingMessage("");
+      setStreamingMessage("Thinking...");
 
-      // Add user message
+      const trimmed = content.trim();
       const userMessage: Message = {
         id: crypto.randomUUID(),
         role: "user",
-        content: content.trim(),
+        content: trimmed,
         timestamp: Date.now(),
       };
+      const optimisticMessages = [...messages, userMessage];
+      persistState(optimisticMessages);
 
-      const updatedMessages = [...messages, userMessage];
-      saveMessages(updatedMessages);
-
-      // Create abort controller for this request
       abortControllerRef.current = new AbortController();
 
       try {
-        // Call API with streaming
-        const stream = await sendMessage(
+        const response = await sendSmartBuyerChat(
           {
-            message: content.trim(),
-            sessionId,
-            context,
+            message: trimmed,
+            conversationId,
           },
           abortControllerRef.current.signal
         );
 
-        // Process stream
-        let fullResponse = "";
-        let metadata: any = {};
+        const assistantMessages = response.messages
+          .filter((msg) => msg.role === "assistant")
+          .map((msg) => normalizeChatMessage(msg, response.summary_text));
 
-        for await (const chunk of stream) {
-          if (chunk.type === "content") {
-            fullResponse += chunk.content;
-            setStreamingMessage(fullResponse);
-          } else if (chunk.type === "metadata") {
-            metadata = chunk.data;
-          } else if (chunk.type === "error") {
-            throw new Error(chunk.message);
-          }
-        }
-
-        // Add assistant message
-        const assistantMessage: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: fullResponse,
-          timestamp: Date.now(),
-          metadata,
-        };
-
-        saveMessages([...updatedMessages, assistantMessage]);
+        persistState(
+          [...optimisticMessages, ...assistantMessages],
+          response.conversation_id
+        );
         setStreamingMessage("");
       } catch (err: any) {
         if (err.name === "AbortError") {
@@ -119,15 +119,13 @@ export function useChat(sessionId: string) {
         }
       } finally {
         setIsLoading(false);
+        setStreamingMessage("");
         abortControllerRef.current = null;
       }
     },
-    [messages, isLoading, sessionId, saveMessages]
+    [conversationId, isLoading, messages, persistState]
   );
 
-  /**
-   * Cancel ongoing request
-   */
   const cancel = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -137,36 +135,26 @@ export function useChat(sessionId: string) {
     }
   }, []);
 
-  /**
-   * Clear chat history for this session
-   */
   const clear = useCallback(() => {
-    saveMessages([]);
+    persistState([], undefined);
     setStreamingMessage("");
     setError(null);
-  }, [saveMessages]);
+  }, [persistState]);
 
-  /**
-   * Retry last message
-   */
   const retry = useCallback(() => {
     if (messages.length === 0) return;
     
-    // Find last user message
     const lastUserMessage = [...messages]
       .reverse()
-      .find((m) => m.role === "user");
+      .find((message) => message.role === "user");
     
     if (lastUserMessage) {
-      // Remove messages after last user message
       const index = messages.findIndex((m) => m.id === lastUserMessage.id);
-      const trimmed = messages.slice(0, index);
-      saveMessages(trimmed);
-      
-      // Resend
+      const trimmed = messages.slice(0, index + 1);
+      persistState(trimmed);
       send(lastUserMessage.content);
     }
-  }, [messages, saveMessages, send]);
+  }, [messages, persistState, send]);
 
   return {
     messages,
@@ -177,5 +165,28 @@ export function useChat(sessionId: string) {
     cancel,
     clear,
     retry,
+  };
+}
+
+function normalizeChatMessage(
+  message: SmartBuyerChatMessage,
+  fallbackSummary?: string | null
+): Message {
+  return {
+    id: message.id,
+    role: message.role,
+    content: message.content,
+    timestamp: new Date(message.created_at).getTime(),
+    metadata: message.metadata
+      ? {
+          intent: message.metadata.intent,
+          flow_type: message.metadata.flow_type,
+          top_recommendations: message.metadata.top_recommendations,
+          explanation: message.metadata.explanation,
+          summary_text: message.metadata.summary_text ?? fallbackSummary ?? undefined,
+        }
+      : fallbackSummary
+      ? { flow_type: "smart_buyer", summary_text: fallbackSummary }
+      : undefined,
   };
 }

@@ -4,6 +4,7 @@
  */
 
 import { useState, useRef, KeyboardEvent } from "react";
+import styles from "@/styles/ChatInput.module.css";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -18,7 +19,7 @@ export default function ChatInput({
   onCancel,
   isLoading = false,
   disabled = false,
-  placeholder = "Type your message...",
+  placeholder = "Ask anything – I can help with shopping, research, and more!",
 }: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,8 +53,8 @@ export default function ChatInput({
   };
 
   return (
-    <div className="flex gap-3 items-end">
-      <div className="flex-1 relative">
+    <div className={styles.container}>
+      <div className={styles.inputWrapper}>
         <textarea
           ref={textareaRef}
           value={input}
@@ -62,18 +63,17 @@ export default function ChatInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-          style={{ minHeight: "52px", maxHeight: "200px" }}
+          className={styles.textarea}
         />
         
-        {isLoading && (
+        {isLoading && onCancel && (
           <button
             onClick={onCancel}
-            className="absolute right-3 bottom-3 p-1 hover:bg-gray-100 rounded transition-colors"
+            className={styles.cancelButton}
             title="Cancel"
           >
             <svg
-              className="w-5 h-5 text-gray-500"
+              className={styles.cancelIcon}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -92,44 +92,18 @@ export default function ChatInput({
       <button
         onClick={handleSend}
         disabled={disabled || !input.trim()}
-        className={`
-          px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2
-          ${
-            disabled || !input.trim()
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95"
-          }
-        `}
-        style={{ minHeight: "52px" }}
+        className={styles.sendButton}
       >
         {isLoading ? (
           <>
-            <svg
-              className="animate-spin h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
+            <div className={styles.spinner}></div>
             <span>Sending...</span>
           </>
         ) : (
           <>
             <span>Send</span>
             <svg
-              className="w-5 h-5"
+              className={styles.sendIcon}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

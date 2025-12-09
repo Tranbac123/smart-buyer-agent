@@ -1,15 +1,27 @@
 /**
- * Global Styles
+ * Global Styles - Dark ChatGPT Theme
  */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* CSS Variables for Dark Theme */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #2a2a2a;
+  --bg-hover: #353535;
+  
+  --text-primary: #ececec;
+  --text-secondary: #b4b4b4;
+  --text-tertiary: #8e8e8e;
+  
+  --accent-blue: #2b7de9;
+  --accent-purple: #8b5cf6;
+  
+  --border-primary: #3f3f3f;
+  --border-secondary: #2f2f2f;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -27,6 +39,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 a {
@@ -34,23 +48,29 @@ a {
   text-decoration: none;
 }
 
-/* Custom scrollbar */
+/* Custom Dark Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--bg-tertiary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--bg-hover);
+}
+
+/* Scrollbar for Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-tertiary) var(--bg-secondary);
 }
 
 /* Animations */
@@ -69,13 +89,14 @@ a {
   animation: slideIn 0.3s ease-out;
 }
 
-/* Prose styles for message content */
+/* Message Content Prose Styles */
 .prose {
-  color: inherit;
+  color: var(--text-primary);
+  line-height: 1.6;
 }
 
 .prose p {
-  margin: 0.5em 0;
+  margin: 0.75em 0;
 }
 
 .prose p:first-child {
@@ -88,28 +109,85 @@ a {
 
 .prose strong {
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .prose code {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--accent-blue);
   padding: 0.2em 0.4em;
-  border-radius: 0.25em;
+  border-radius: 4px;
   font-size: 0.9em;
+  font-family: 'Courier New', monospace;
 }
 
 .prose pre {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.4);
   padding: 1em;
-  border-radius: 0.5em;
+  border-radius: 8px;
   overflow-x: auto;
+  border: 1px solid var(--border-primary);
+  margin: 1em 0;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
 }
 
 .prose ul,
 .prose ol {
-  margin: 0.5em 0;
+  margin: 0.75em 0;
   padding-left: 1.5em;
 }
 
 .prose li {
-  margin: 0.25em 0;
+  margin: 0.5em 0;
+}
+
+.prose a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.prose a:hover {
+  color: #60a5fa;
+}
+
+/* Utility Classes */
+.button-primary {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.button-primary:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.button-primary:active {
+  transform: scale(0.98);
+}
+
+.button-secondary {
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.button-secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-secondary);
 }

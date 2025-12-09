@@ -4,7 +4,10 @@
 
 export const config = {
   // API Base URL
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  apiUrl:
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:8000",
   
   // API Version
   apiVersion: "v1",
@@ -13,6 +16,7 @@ export const config = {
   endpoints: {
     chat: "/v1/chat",
     smartBuyer: "/v1/smart-buyer",
+    smartBuyerChat: "/v1/smart-buyer/chat",
     deepResearch: "/v1/deep-research",
     health: "/health",
   },

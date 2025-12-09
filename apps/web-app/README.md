@@ -67,7 +67,7 @@ npm install
 cp .env.local.example .env.local
 
 # Edit .env.local with your API URL
-# NEXT_PUBLIC_API_URL=http://localhost:8000
+# NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ### Development
@@ -280,7 +280,7 @@ hover:bg-gray-100 transition-colors
 
 ```bash
 # Required
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 
 # Optional
 NEXT_PUBLIC_ENABLE_STREAMING=true

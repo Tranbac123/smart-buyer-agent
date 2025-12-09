@@ -379,7 +379,7 @@ npm install
 cp .env.local.example .env.local
 
 # Edit .env.local
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ### **3. Run Development Server**

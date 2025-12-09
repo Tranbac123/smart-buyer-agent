@@ -8,12 +8,13 @@ import { useEffect } from "react";
 import ChatWindow from "@/components/ChatWindow";
 import Sidebar from "@/components/Sidebar";
 import { useChatHistory } from "@/hooks/useChatHistory";
+import styles from "@/styles/ChatLayout.module.css";
 
 export default function ChatById() {
   const router = useRouter();
   const { query } = router;
   const id = String(query.id || "");
-  const { getSession, createNew } = useChatHistory();
+  const { getSession } = useChatHistory();
 
   useEffect(() => {
     // If session doesn't exist, create it or redirect
@@ -25,21 +26,21 @@ export default function ChatById() {
 
   if (!id) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-500">Loading...</div>
+      <div className={styles.loading}>
+        <div>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className={styles.layout}>
       {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0">
+      <aside className={styles.sidebar}>
         <Sidebar />
       </aside>
 
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col">
+      <main className={styles.main}>
         <ChatWindow sessionId={id} />
       </main>
     </div>

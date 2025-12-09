@@ -1,0 +1,15 @@
+{
+  "name": "quantumx-ai-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/web-app"
+  ],
+  "scripts": {
+    "lint": "node scripts/run-web-lint.cjs",
+    "web:lint": "npm --workspace apps/web-app run lint"
+  },
+  "devDependencies": {
+    "next": "^14.0.0",
+    "eslint-config-next": "^14.0.0"
+  }
+}

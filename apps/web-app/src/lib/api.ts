@@ -4,7 +4,12 @@
  */
 
 import { config } from "./config";
-import type { SendMessageRequest, SendMessageResponse } from "@/types/chat";
+import type {
+  SendMessageRequest,
+  SendMessageResponse,
+  SmartBuyerChatRequest,
+  SmartBuyerChatResponse,
+} from "@/types/chat";
 
 /**
  * Stream chunk types
@@ -225,4 +230,56 @@ export async function healthCheck(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * Smart Buyer chat endpoint
+ */
+export async function sendSmartBuyerChat(
+  payload: SmartBuyerChatRequest,
+  signal?: AbortSignal
+): Promise<SmartBuyerChatResponse> {
+  const url = "/api/smart-buyer/chat";
+  const body: Record<string, any> = {
+    message: payload.message,
+  };
+
+  if (payload.conversationId) {
+    body.conversation_id = payload.conversationId;
+  }
+  if (typeof payload.topK === "number") {
+    body.top_k = payload.topK;
+  }
+  if (payload.prefs) {
+    body.prefs = payload.prefs;
+  }
+  if (payload.criteria) {
+    body.criteria = payload.criteria;
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal,
+  });
+
+  if (!response.ok) {
+    let detail = `HTTP ${response.status}`;
+    try {
+      const errorBody = await response.json();
+      detail =
+        errorBody?.detail?.message ||
+        errorBody?.detail ||
+        errorBody?.error ||
+        detail;
+    } catch {
+      // ignore json parse errors
+    }
+    throw new Error(detail);
+  }
+
+  return response.json();
 }

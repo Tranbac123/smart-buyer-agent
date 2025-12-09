@@ -5,16 +5,21 @@
 
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useChatHistory } from "@/hooks/useChatHistory";
+import type { ChatSession } from "@/types/chat";
+import styles from "@/styles/ChatList.module.css";
 
-export default function ChatList() {
-  const { sessions, remove } = useChatHistory();
+interface ChatListProps {
+  sessions: ChatSession[];
+  onDelete: (id: string) => void;
+}
+
+export default function ChatList({ sessions, onDelete }: ChatListProps) {
   const router = useRouter();
   const currentId = router.query.id as string;
 
   if (!sessions.length) {
     return (
-      <div className="text-sm text-gray-500 text-center py-4">
+      <div className={styles.empty}>
         No conversations yet
       </div>
     );
@@ -25,7 +30,7 @@ export default function ChatList() {
     e.stopPropagation();
     
     if (confirm("Delete this conversation?")) {
-      remove(id);
+      onDelete(id);
       
       // If deleting current chat, redirect to home
       if (currentId === id) {
@@ -35,38 +40,30 @@ export default function ChatList() {
   };
 
   return (
-    <ul className="space-y-1">
+    <ul className={styles.list}>
       {sessions.map((session) => {
         const isActive = currentId === session.id;
         
         return (
-          <li key={session.id}>
+          <li key={session.id} className={styles.item}>
             <Link
               href={`/chat/${session.id}`}
-              className={`
-                group flex items-center justify-between px-3 py-2 rounded-lg
-                transition-colors text-sm
-                ${
-                  isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "hover:bg-gray-100 text-gray-700"
-                }
-              `}
+              className={`${styles.link} ${isActive ? styles.active : ''}`}
             >
-              <div className="flex-1 truncate">
-                <div className="font-medium truncate">{session.title}</div>
-                <div className="text-xs text-gray-500">
+              <div className={styles.content}>
+                <div className={styles.title}>{session.title}</div>
+                <div className={styles.timestamp}>
                   {formatDate(session.lastMessageAt || session.createdAt)}
                 </div>
               </div>
               
               <button
                 onClick={(e) => handleDelete(e, session.id)}
-                className="opacity-0 group-hover:opacity-100 ml-2 p-1 hover:bg-red-50 hover:text-red-600 rounded transition-all"
+                className={styles.deleteButton}
                 title="Delete conversation"
               >
                 <svg
-                  className="w-4 h-4"
+                  className={styles.deleteIcon}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

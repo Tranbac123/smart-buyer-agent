@@ -5,35 +5,39 @@
 
 import NewChatButton from "./NewChatButton";
 import ChatList from "./ChatList";
+import { useChatHistory } from "@/hooks/useChatHistory";
+import styles from "@/styles/Sidebar.module.css";
 
 export default function Sidebar() {
+  const { sessions, createNew, remove } = useChatHistory();
+
   return (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200">
+    <div className={styles.sidebar}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">QX</span>
+      <div className={styles.header}>
+        <div className={styles.branding}>
+          <div className={styles.logo}>
+            <span className={styles.logoText}>QX</span>
           </div>
           <div>
-            <h1 className="font-bold text-lg">QuantumX AI</h1>
-            <p className="text-xs text-gray-500">Smart AI Assistant</p>
+            <h1 className={styles.brandName}>QuantumX AI</h1>
+            <p className={styles.brandTagline}>Smart AI Assistant</p>
           </div>
         </div>
         
-        <NewChatButton />
+        <NewChatButton onNewChat={createNew} />
       </div>
 
       {/* Chat List */}
-      <div className="flex-1 overflow-y-auto p-3">
-        <ChatList />
+      <div className={styles.chatList}>
+        <ChatList sessions={sessions} onDelete={remove} />
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="text-xs text-gray-500 space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+      <div className={styles.footer}>
+        <div className={styles.status}>
+          <div className={styles.statusIndicator}>
+            <div className={styles.statusDot}></div>
             <span>All systems operational</span>
           </div>
           <div>Version 0.1.0</div>

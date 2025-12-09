@@ -4,24 +4,28 @@
  */
 
 import { useRouter } from "next/router";
-import { useChatHistory } from "@/hooks/useChatHistory";
+import type { ChatSession } from "@/types/chat";
+import styles from "@/styles/NewChatButton.module.css";
 
-export default function NewChatButton() {
+interface NewChatButtonProps {
+  onNewChat: () => ChatSession;
+}
+
+export default function NewChatButton({ onNewChat }: NewChatButtonProps) {
   const router = useRouter();
-  const { createNew } = useChatHistory();
 
   const handleNewChat = () => {
-    const session = createNew();
+    const session = onNewChat();
     router.push(`/chat/${session.id}`);
   };
 
   return (
     <button
-      className="w-full rounded-lg px-4 py-2 border border-gray-300 hover:bg-gray-50 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+      className={styles.button}
       onClick={handleNewChat}
     >
       <svg
-        className="w-4 h-4"
+        className={styles.icon}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
