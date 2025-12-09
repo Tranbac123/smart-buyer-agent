@@ -101,11 +101,16 @@ class Settings(BaseSettings):
     def _parse_cors(cls, value: Any) -> List[str]:
         if value is None:
             return ["*"]
-        if isinstance(value, str):
+        if isinstance(value, list):
             return [str(x).strip() for x in value if str(x).strip()]
-        s = str(value).strip()
+        if isinstance(value, str):
+            s = value.strip()
         if not s:
             return ["*"]
+            # Handle wildcard
+            if s == "*":
+                return ["*"]
+            # Handle JSON array string
         if s.startswith("["):
             try:
                 import json
@@ -113,7 +118,9 @@ class Settings(BaseSettings):
                 return [str(x).strip() for x in arr if str(x).strip()]
             except Exception:
                 pass
+            # Handle comma-separated values
         return [x.strip() for x in s.split(",") if x.strip()]
+        return ["*"]
 
     @field_validator("DEBUG", mode="before")
     @classmethod
