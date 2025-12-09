@@ -82,8 +82,6 @@ class SmartBuyerResponse(BaseModel):
     explanation: ExplanationOut
     metadata: Dict[str, Any] = Field(default_factory=dict)
     summary_text: Optional[str] = None
-<<<<<<< Updated upstream
-=======
 
 
 class ChatMessageOut(BaseModel):
@@ -110,7 +108,6 @@ class SmartBuyerChatResponse(BaseModel):
     explanation: ExplanationOut
     metadata: Dict[str, Any] = Field(default_factory=dict)
     summary_text: Optional[str] = None
->>>>>>> Stashed changes
 
 
 def _correlation_id(x_request_id: Optional[str]) -> str:
@@ -357,18 +354,6 @@ def _parse_smart_buyer_payload(
         summary=explanation_raw.get("summary", ""),
     )
 
-<<<<<<< Updated upstream
-    return SmartBuyerResponse(
-        request_id=rid,
-        query=req.query,
-        latency_ms=latency_ms,
-        offers=offers,
-        scoring=scoring,
-        explanation=explanation,
-        metadata=metadata | {"top_k": req.top_k},
-        summary_text=result.get("summary_text"),
-    )
-=======
     return offers, scoring, explanation, metadata
 
 
@@ -425,4 +410,3 @@ def _build_top_recommendations(
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
->>>>>>> Stashed changes
